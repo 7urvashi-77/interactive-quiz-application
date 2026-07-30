@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Quiz Result</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+        body {
+            min-height: 100vh;
+            background-image: url("images/bgimg8.jpg");
+            background-size: cover;
+            background-position: top;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .result-card {
+            background: lightgrey;
+            width: 100%;
+            max-width: 520px;
+            padding: 35px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px black;
+            text-align: center;
+        }
+        .score-circle {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            font-weight: bold;
+            margin: 20px auto;
+            color: #333;
+            background: conic-gradient(#ddd 0deg, #ddd 360deg);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            transition: background 0.3s;
+        }
+        .btn-main {
+            background: purple;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            color: white;
+        }
+        .btn-main:hover { background: gray; }
+        .best-score-banner {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: white;
+            border-radius: 10px;
+            padding: 10px 16px;
+            font-size: 17px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: none; 
+            animation: glow 1.5s infinite;
+        }
+        @keyframes glow {
+            0%   { box-shadow: 0 0 8px #ffd700; }
+            50%  { box-shadow: 0 0 22px #ffd700; }
+            100% { box-shadow: 0 0 8px #ffd700; }
+        }
+        #shareBtn {
+            background: #1da1f2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px;
+            font-size: 15px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 6px;
+            transition: 0.3s;
+        }
+        #shareBtn:hover { background: #0d8ecf; }
+        #copiedMsg {
+            display: none;
+            background: #28a745;
+            color: white;
+            border-radius: 8px;
+            padding: 8px;
+            font-size: 14px;
+            margin-top: 6px;
+        }
+        #reviewBox {
+            background: #f0f0f0;
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 10px;
+            max-height: 320px;
+            overflow-y: auto;
+            text-align: left;
+        }
+        .review-card {
+            background: white;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 10px;
+            border-left: 5px solid #ccc;
+        }
+        .review-card.correct-card { border-left-color: #28a745; }
+        .review-card.wrong-card   { border-left-color: #dc3545; }
+        .review-card .q-number { font-size: 12px; font-weight: bold; color: #888; margin-bottom: 4px; }
+        .review-card .q-text   { font-size: 14px; font-weight: bold; color: #222; margin-bottom: 8px; }
+        .answer-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin: 2px 0;
+        }
+        .badge-correct { background: #d4edda; color: #155724; border: 1px solid #28a745; }
+        .badge-wrong   { background: #f8d7da; color: #721c24; border: 1px solid #dc3545; }
+        .result-icon   { float: right; font-size: 20px; }
+
+        #historyBox {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        #historyScroll { max-height: 150px; overflow-y: auto; }
+        #historyScroll div { padding: 5px; border-bottom: 1px solid #ddd; font-size: 14px; }
+        #clearHistoryBtn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 7px 16px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 10px;
+            width: 100%;
+            cursor: pointer;
+        }
+        #clearHistoryBtn:hover { background: #a71d2a; }
+        #noHistoryMsg { color: #999; font-size: 13px; padding: 6px 0; }
+    </style>
+</head>
+
+<body>
+    <script>
+        $(document).ready(function(){
+            $(".result-card").hide().fadeIn(800).css("transform","scale(0.9)");
+            setTimeout(function(){ $(".result-card").css("transform","scale(1)"); }, 200);
+        });
+    </script>
+
+    <script>
+        function typeMessage(text){
+            let i = 0;
+            $("#message").text("");
+            function typing(){
+                if(i < text.length){
+                    $("#message").append(text.charAt(i));
+                    i++;
+                    setTimeout(typing, 100);
+                }
+            }
+            typing();
+        }
+    </script>
+
+    <script>
+        function updateColor(percent){
+            if(percent >= 70)       $(".score-circle").css("box-shadow","0 0 20px green");
+            else if(percent >= 40)  $(".score-circle").css("box-shadow","0 0 20px orange");
+            else                    $(".score-circle").css("box-shadow","0 0 20px red");
+        }
+    </script>
+
+    <script>
+        function showHistory(){
+            var scores = localStorage.getItem("scores");
+            var arr = scores ? scores.split(",").filter(function(s){ return s.trim() !== ""; }) : [];
+
+            if(arr.length === 0){
+                $("#history").html("<div id='noHistoryMsg'>No previous scores yet.</div>");
+                $("#clearHistoryBtn").hide();
+            } else {
+                var html = "";
+                arr.forEach(function(s, index){
+                    html += "<div>🏆 Attempt " + (index + 1) + " &nbsp;—&nbsp; <strong>" + s + "</strong></div>";
+                });
+                $("#history").html(html);
+                $("#clearHistoryBtn").show();
+            }
+        }
+    </script>
+
+    <script>
+        function showReview(){
+            var raw = localStorage.getItem("lastReview");
+            if(!raw){
+                $("#reviewArea").html("<p class='text-muted text-center'>No review data found.</p>");
+                return;
+            }
+            var reviewData = JSON.parse(raw);
+            var html = "";
+            for(var i = 0; i < reviewData.length; i++){
+                var item = reviewData[i];
+                var isCorrect = (item.given === item.correct);
+                var cardClass = isCorrect ? "correct-card" : "wrong-card";
+                var icon = isCorrect ? "✅" : "❌";
+                var options = [item.o1, item.o2, item.o3, item.o4];
+                var correctText = options[item.correct - 1];
+                var givenText   = options[item.given - 1];
+
+                html += "<div class='review-card " + cardClass + "'>";
+                html += "<span class='result-icon'>" + icon + "</span>";
+                html += "<div class='q-number'>Q" + (i+1) + "</div>";
+                html += "<div class='q-text'>" + item.q + "</div>";
+                if(isCorrect){
+                    html += "<span class='answer-badge badge-correct'>✔ " + correctText + "</span>";
+                } else {
+                    html += "<div><span class='answer-badge badge-wrong'>✘ Your Answer: " + givenText + "</span></div>";
+                    html += "<div><span class='answer-badge badge-correct'>✔ Correct Answer: " + correctText + "</span></div>";
+                }
+                html += "</div>";
+            }
+            $("#reviewArea").html(html);
+        }
+    </script>
+
+    <div class="result-card">
+        <h3>Quiz Completed 🎉</h3><hr>
+        <div class="best-score-banner" id="bestBanner">
+            🥇 New Best Score! You beat your record!
+        </div>
+
+        <div class="score-circle" id="circle">
+            <span id="scoreText">0%</span>
+        </div>
+
+        <h3 id="scoreDisplay"></h3>
+        <h4 id="category"></h4>
+        <h5 id="level"></h5>
+        <p id="message"></p>
+
+        <div class="d-grid gap-2">
+            <a id="retryBtn" class="btn btn-main">Play Again</a>
+            <a href="index.html" class="btn btn-outline-secondary">Back to Home</a>
+
+            <button id="shareBtn">📤 Share My Score</button>
+            <div id="copiedMsg">✅ Score copied to clipboard! Paste it anywhere to share.</div>
+        </div>
+        <button id="toggleReview" class="btn btn-outline-success mt-3 w-100">
+            📋 View Answer Review ⬇
+        </button>
+        <div id="reviewBox" style="display:none;">
+            <div id="reviewArea" class="mt-2"></div>
+        </div>
+        <button id="toggleHistory" class="btn btn-outline-dark mt-2 w-100">
+            Previous Scores ⬇
+        </button>
+        <div id="historyBox" style="display:none;">
+            <div id="historyScroll">
+                <div id="history" class="mt-1"></div>
+            </div>
+            <button id="clearHistoryBtn" style="display:none;">🗑️ Clear All History</button>
+        </div>
+    </div>
+
+<script>
+    $("#toggleReview").click(function(){
+        $("#reviewBox").slideToggle(300);
+        $(this).text($(this).text().includes("⬇") ? "📋 View Answer Review ⬆" : "📋 View Answer Review ⬇");
+    });
+    $("#toggleHistory").click(function(){
+        $("#historyBox").slideToggle(300);
+        $(this).text($(this).text().includes("⬇") ? "Previous Scores ⬆" : "Previous Scores ⬇");
+    });
+    $("#clearHistoryBtn").click(function(){
+        if(confirm("Are you sure you want to clear all score history?")){
+            localStorage.removeItem("scores");
+            showHistory();
+        }
+    });
+</script>
+
+<script>
+    var params   = new URLSearchParams(window.location.search);
+    var score    = params.get("score");
+    var total    = params.get("total");
+    var category = params.get("cat");
+    var level    = params.get("level");
+
+    document.getElementById("scoreDisplay").innerHTML = score + " / " + total;
+    document.getElementById("category").innerHTML = "Category : " + category;
+    document.getElementById("level").innerHTML    = "Level : " + level;
+
+    document.getElementById("retryBtn").onclick = function(){
+        window.location.href = "quizstart.html?cat=" + category + "&level=" + level;
+    };
+
+    var message = "";
+    if(score == total)        message = "Perfect Score 🎉";
+    else if(score >= total/2) message = "Good Job 👍";
+    else                      message = "Try Again 🙂";
+
+    var percent = Math.round((score / total) * 100);
+
+    typeMessage(message);
+    updateColor(percent);
+    showReview();
+    var savedBest = parseInt(localStorage.getItem("bestScorePercent")) || 0;
+
+    if(percent > savedBest){
+        localStorage.setItem("bestScorePercent", percent);
+        document.getElementById("bestBanner").style.display = "block";
+    }
+    var scores = localStorage.getItem("scores") || "";
+    scores = scores + score + "/" + total + ",";
+    localStorage.setItem("scores", scores);
+    showHistory();
+    var i = 0;
+    var interval = setInterval(function(){
+        if(i <= percent){
+            document.getElementById("circle").style.background =
+                "conic-gradient(green " + (i * 3.6) + "deg, #ddd 0deg)";
+            document.getElementById("scoreText").innerHTML = i + "%";
+            i++;
+        } else {
+            clearInterval(interval);
+        }
+    }, 20);
+    if(percent >= 70){
+        setTimeout(function(){
+            confetti({ particleCount:150, spread:100, origin:{ y:0.6 } });
+        }, 1000);
+    }
+    document.getElementById("shareBtn").onclick = function(){
+        var emoji = percent === 100 ? "🏆" : percent >= 70 ? "🎉" : "💪";
+        var shareText =
+            emoji + " I just scored " + score + "/" + total +
+            " (" + percent + "%) on the " + category + " quiz" +
+            " (" + level + " level) on Thinking Caps On! " +
+            "Can you beat my score? 🧠";
+
+        navigator.clipboard.writeText(shareText).then(function(){
+            document.getElementById("copiedMsg").style.display = "block";
+            setTimeout(function(){
+                document.getElementById("copiedMsg").style.display = "none";
+            }, 3000);
+        }).catch(function(){
+            alert("Copy this:\n\n" + shareText);
+        });
+    };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+</body>
+</html>

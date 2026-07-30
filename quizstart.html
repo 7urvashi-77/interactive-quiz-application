@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Quiz Page</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<style>
+    body {
+        background-image: url("images/quizbg4.jpg");
+        background-size: cover;
+    }
+    .active-option {
+        transform: scale(0.95);
+        background-color: #e0f7fa;
+    }
+    .quiz-card {
+        width: 90%;
+        background: white;
+        font-size: 20px;
+        text-align: center;
+    }
+    .circle-timer{
+        position:relative;
+        width:80px;
+        margin:auto;
+    }
+    .circle-timer span{
+        position:absolute;
+        top:50%;
+        left:50%;
+        transform:translate(-50%,-50%);
+        font-weight:bold;
+    }
+    .list-group-item input[type="radio"] {
+        display: none;
+    }
+    .list-group-item span {
+        display: block;
+        padding: 8px;
+        border-radius: 5px;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    .list-group-item span:hover {
+        background-color: azure;
+    }
+    .shake{
+        animation:shake 0.4s;
+    }
+    @keyframes shake{
+        0%{transform:translateX(0)}
+        25%{transform:translateX(-5px)}
+        50%{transform:translateX(5px)}
+        75%{transform:translateX(-5px)}
+        100%{transform:translateX(0)}
+    }
+    .logo-img{
+        width:180px;
+        margin:10px;
+    }
+    .pressed {
+        transform: scale(0.95);
+    }
+    .selected {
+        border: 2px solid #0d6efd;
+        background-color: #e8f0fe;
+    }
+</style>
+</head>
+<body>
+    <script>
+        function slideQuestion(){
+            $("#questionBox").hide().slideDown(300);
+        }
+    </script>
+    <script>
+        function updateTimerColor(time){
+            if(time <= 3){
+                $("#circleTimer").css("transition","0.5s");
+                $("#circleTimer").css("stroke","red");
+            }
+        }
+    </script>
+    <script>
+        function updateProgress(){
+            var percent = ((current+1)/questions.length)*100;
+            $("#progressBar").css("width", percent + "%");
+        }
+    </script>
+    <script>
+        function showLockMessage(){
+            $("#lockMsg").fadeIn(200).delay(800).fadeOut(200);
+        }
+    </script>
+    <script>
+        $(document).on("click", "#options span", function(){
+            $("#options span").removeClass("selected");
+            $(this).addClass("selected");
+        });
+    </script>
+    <div class="container d-flex justify-content-center align-items-center min-vh-100">
+        <div class="quiz quiz-card shadow-lg p-4 rounded">
+            <div class="d-flex justify-content-between mb-3">
+                <h3 class="fw-bold">Programming Quiz</h3>
+                <div class="progress mb-3">
+                    <div id="progressBar" class="progress-bar" style="width: 0%"></div>
+                </div>
+                <div class="text-center mt-2">
+                    <svg width="90" height="90">
+                        <circle cx="45" cy="45" r="40"
+                            stroke="lightgray"
+                            stroke-width="6"
+                            fill="none"/>
+                        <circle id="circleTimer"
+                            cx="45"
+                            cy="45"
+                            r="40"
+                            stroke="green"
+                            stroke-width="6"
+                            fill="none"
+                            stroke-dasharray="251"
+                            stroke-dashoffset="0"/>
+                    </svg>
+                    <h5 id="timeText">10</h5>
+                </div>
+            </div>
+            <div id="questionBox">
+                <h5 id="qno" class="mt-3"></h5>
+                <h4 id="question"></h4>
+                <div class="list-group mt-3" id="options"></div>
+            </div>
+            <div id="lockMsg" class="text-success fw-bold text-center mt-2" style="display:none;">
+                Answer Locked ✅
+            </div>
+            <div class="d-flex justify-content-between mt-4">
+                <button id="prevBtn" onclick="prevQuestion()" class="btn btn-outline-secondary">Previous</button>
+                <button id="nextBtn" onclick="nextQuestion()" class="btn btn-outline-secondary">Next</button>
+            </div>
+        </div>
+    </div>
+    <audio id="timerSound" src="audios/sound3.mp3"></audio>
+<script>
+    var params = new URLSearchParams(window.location.search);
+    var category = params.get("cat");
+    var level = params.get("level");
+    var questions = [];
+
+if(category=="programming" && level=="easy"){
+questions = [
+["HTML stands for?","Hyper Text Markup Language","High Tool Markup Language","Home Tool Markup Language","Hyperlinks Text Mark",1],
+["Which language runs in browser?","Python","C++","JavaScript","Java",3],
+["CSS is used for?","Logic","Styling","Database","Server",2],
+["Which symbol is used for comments in Python?","#","//","<!-- -->","**",1],
+["Which of these is a programming language?","HTML","Python","CSS","HTTP",2]
+]
+}
+
+else if(category=="programming" && level=="medium"){
+questions = [
+["Which company developed Java?","Microsoft","Sun Microsystems","Apple","IBM",2],
+["Which is a JavaScript framework?","Django","Laravel","React","Flask",3],
+["Which tag creates a hyperlink in HTML?","<link>","<a>","<href>","<hyper>",2],
+["Which language is used for Android apps?","Java","PHP","C","Swift",1],
+["Which symbol is used to end a statement in C?",";",":",".",",",1]
+]
+}
+
+else if(category=="programming" && level=="hard"){
+questions = [
+["Which sorting algorithm is fastest on average?","Bubble Sort","Merge Sort","Selection Sort","Insertion Sort",2],
+["Which language is mainly used for AI?","Python","HTML","CSS","SQL",1],
+["Which protocol is used to transfer web pages?","FTP","HTTP","SMTP","TCP",2],
+["Which data structure uses FIFO?","Stack","Queue","Tree","Graph",2],
+["Which database language is used to query data?","HTML","SQL","CSS","Python",2]
+]
+}
+
+else if(category=="language" && level=="easy"){
+questions = [
+["Correct spelling?","Recieve","Receive","Receeve","Receve",2],
+["Choose correct sentence","She go to school","She goes to school","She going school","She gone school",2],
+["Opposite of 'Hot'?","Warm","Cold","Cool","Dry",2],
+["Plural of 'Child'?","Childs","Children","Childes","Childrens",2],
+["Synonym of 'Happy'?","Sad","Angry","Joyful","Tired",3]
+]
+}
+
+else if(category=="language" && level=="medium"){
+questions = [
+["Correct past tense of 'run'?","Runed","Ran","Runned","Running",2],
+["Choose correct word","Their going home","They're going home","There going home","Theyre going home",2],
+["Meaning of 'Brave'?","Cowardly","Fearless","Lazy","Weak",2],
+["Antonym of 'Begin'?","Start","End","Open","Initiate",2],
+["Which is a noun?","Run","Happy","Book","Quickly",3]
+]
+}
+
+else if(category=="language" && level=="hard"){
+questions = [
+["Which is correct?","I have did it","I have done it","I has done it","I done it",2],
+["Choose correct form","She don't like tea","She doesn't like tea","She not like tea","She didn't likes tea",2],
+["Meaning of 'Meticulous'?","Careless","Very careful","Angry","Fast",2],
+["Which is a conjunction?","Run","And","Happy","Blue",2],
+["Passive voice of 'He eats food'?","Food is eaten by him","Food was eaten by him","Food eaten him","He food eaten",1]
+]
+}
+
+else if(category=="sports" && level=="easy"){
+questions = [
+["How many players in cricket team?","9","10","11","12",3],
+["FIFA World Cup is for?","Cricket","Basketball","Football","Tennis",3],
+["Olympic rings count?","4","5","6","7",2],
+["Tennis ball color?","White","Orange","Yellow","Green",3],
+["How many players in basketball team?","4","5","6","7",2]
+]
+}
+
+else if(category=="sports" && level=="medium"){
+questions = [
+["Who holds most Grand Slams (men)?","Federer","Djokovic","Nadal","Murray",2],
+["India won first Cricket World Cup?","1975","1979","1983","1987",3],
+["Fastest man on Earth?","Yohan Blake","Usain Bolt","Tyson Gay","Asafa Powell",2],
+["NBA team with most titles?","Lakers","Bulls","Celtics","Warriors",3],
+["Which country invented football?","Brazil","England","France","Germany",2]
+]
+}
+
+else if(category=="sports" && level=="hard"){
+questions = [
+["First woman to win Wimbledon 4 times?","Steffi Graf","Serena Williams","Venus Williams","Martina Navratilova",4],
+["First Indian to win individual Olympic gold?","Leander Paes","Abhinav Bindra","Sushil Kumar","P.V. Sindhu",2],
+["Formula 1 driver with most wins?","Ayrton Senna","Michael Schumacher","Lewis Hamilton","Sebastian Vettel",3],
+["Which country has won most Olympics gold?","Russia","China","USA","Germany",3],
+["First Indian to score test century?","Sachin Tendulkar","Sunil Gavaskar","Lala Amarnath","Vinoo Mankad",3]
+]
+}
+
+else if(category=="history" && level=="easy"){
+questions = [
+["Who was first US President?","Lincoln","Washington","Jefferson","Adams",2],
+["India got independence in?","1945","1946","1947","1948",3],
+["Who built Taj Mahal?","Akbar","Humayun","Shah Jahan","Aurangzeb",3],
+["World War 2 ended in?","1943","1944","1945","1946",3],
+["Who invented telephone?","Edison","Bell","Tesla","Marconi",2]
+]
+}
+
+else if(category=="history" && level=="medium"){
+questions = [
+["French Revolution started in?","1779","1789","1799","1809",2],
+["Who was known as Iron Man of India?","Gandhi","Nehru","Patel","Bose",3],
+["Roman Empire fell in?","376 AD","476 AD","576 AD","676 AD",2],
+["Who wrote 'The Prince'?","Dante","Machiavelli","Voltaire","Rousseau",2],
+["First Prime Minister of India?","Gandhi","Patel","Nehru","Ambedkar",3]
+]
+}
+
+else if(category=="history" && level=="hard"){
+questions = [
+["Battle of Plassey was in?","1757","1764","1857","1947",1],
+["Who gave 'Dandi March'?","Nehru","Bose","Gandhi","Patel",3],
+["Magna Carta was signed in?","1215","1315","1415","1515",1],
+["Who was Napoleon defeated by at Waterloo?","Wellington","Nelson","Blucher","Kutuzov",1],
+["First woman Prime Minister of India?","Indira Gandhi","Sarojini Naidu","Pratibha Patil","Sonia Gandhi",1]
+]
+}
+
+else if(category=="music" && level=="easy"){
+questions = [
+["Who is known as King of Pop?","Elvis Presley","Michael Jackson","Justin Bieber","Drake",2],
+["Which instrument has keys?","Guitar","Drums","Piano","Violin",3],
+["Which singer sang 'Shape of You'?","Ed Sheeran","Drake","Adele","Bruno Mars",1],
+["Which music app is popular?","Spotify","Chrome","Excel","PowerPoint",1],
+["Which band sang 'Believer'?","Coldplay","Imagine Dragons","BTS","Maroon 5",2]
+]
+}
+
+else if(category=="music" && level=="medium"){
+questions = [
+["BTS is from which country?","China","Japan","South Korea","Thailand",3],
+["Adele is famous for?","Acting","Singing","Dancing","Painting",2],
+["Who sang 'Bad Guy'?","Billie Eilish","Ariana Grande","Taylor Swift","Doja Cat",1],
+["Which instrument has 6 strings usually?","Piano","Guitar","Drums","Flute",2],
+["Grammy Awards are for?","Movies","Music","Sports","Books",2]
+]
+}
+
+else if(category=="music" && level=="hard"){
+questions = [
+["Freddie Mercury was singer of?","Queen","Beatles","Coldplay","Metallica",1],
+["Which band sang 'Yellow'?","Coldplay","U2","Linkin Park","Nirvana",1],
+["Taylor Swift album 2022?","Midnights","1989","Red","Fearless",1],
+["Which genre is Eminem famous for?","Rock","Hip-Hop","Jazz","Classical",2],
+["Which singer sang 'Thriller'?","Prince","Michael Jackson","Elton John","Bruno Mars",2]
+]
+}
+
+else if(category=="gk" && level=="easy"){
+questions = [
+["Largest planet?","Earth","Mars","Jupiter","Venus",3],
+["How many days in a week?","5","6","7","8",3],
+["Water chemical formula?","H2O","CO2","O2","NaCl",1],
+["Sun is a?","Planet","Star","Moon","Asteroid",2],
+["How many continents?","5","6","7","8",3]
+]
+}
+
+else if(category=="gk" && level=="medium"){
+questions = [
+["Fastest land animal?","Lion","Cheetah","Tiger","Horse",2],
+["Which ocean is largest?","Indian","Atlantic","Pacific","Arctic",3],
+["Human body bones?","196","206","210","180",2],
+["Which gas do plants use?","Oxygen","Nitrogen","Carbon dioxide","Hydrogen",3],
+["Which planet is red?","Mars","Jupiter","Saturn","Mercury",1]
+]
+}
+
+else if(category=="gk" && level=="hard"){
+questions = [
+["Speed of light?","300000 km/s","150000 km/s","100000 km/s","500000 km/s",1],
+["Smallest bone in body?","Femur","Stapes","Tibia","Radius",2],
+["Which metal is liquid at room temp?","Gold","Mercury","Iron","Silver",2],
+["Earth layer we live on?","Core","Mantle","Crust","Outer core",3],
+["Which vitamin from sunlight?","A","B","C","D",4]
+]
+}
+
+else if(category=="logo" && level=="easy"){
+questions = [
+["<img src='images/apple.jpg' class='logo-img'>","Apple","Samsung","Dell","Microsoft",1],
+["<img src='images/nike.jpg' class='logo-img'>","Adidas","Nike","Puma","Reebok",2],
+["<img src='images/mcdonalds.jpg' class='logo-img'>","Burger King","KFC","McDonald's","Subway",3],
+["<img src='images/youtube.jpg' class='logo-img'>","Netflix","YouTube","Spotify","Prime",2],
+["<img src='images/instagram.jpg' class='logo-img'>","Snapchat","Instagram","Facebook","Twitter",2]
+];
+}
+
+else if(category=="logo" && level=="medium"){
+questions = [
+["<img src='images/adidas.jpg' class='logo-img'>","Nike","Adidas","Puma","Reebok",2],
+["<img src='images/netflix.jpg' class='logo-img'>","Netflix","Amazon","Disney","Hulu",1],
+["<img src='images/android.jpg' class='logo-img'>","Apple","Android","Windows","Linux",2],
+["<img src='images/snapchat.jpg' class='logo-img'>","Telegram","Snapchat","Signal","Discord",2],
+["<img src='images/starbucks.jpg' class='logo-img'>","Dunkin","Costa","Starbucks","Cafe Coffee Day",3]
+];
+}
+
+else if(category=="logo" && level=="hard"){
+questions = [
+["Three stripes logo?","Nike","Adidas","Puma","Reebok",2],
+["Ghost logo app?","Snapchat","Telegram","Signal","Discord",1],
+["Red N logo?","Netflix","Nestle","Nokia","Nissan",1],
+["Green robot logo?","Android","Apple","Windows","Linux",1],
+["Blue cloud logo?","iCloud","Dropbox","Google Drive","OneDrive",2]
+]
+} 
+var current = 0;
+var score = 0;
+var time = 10;
+var timer;
+var userAnswers = new Array(questions.length).fill(0);
+
+if(questions.length === 0){
+    alert("Quiz data not found. Please start again.");
+    window.location.href = "home.html";
+}
+
+function loadQuestion() {
+    updateProgress();
+    document.getElementById("qno").innerHTML = "Question " + (current + 1) + " of " + questions.length;
+    document.getElementById("question").innerHTML = questions[current][0];
+
+    var optionBox = document.getElementById("options");
+    optionBox.innerHTML = "";
+    for (var i = 1; i <= 4; i++) {
+        var checked = (userAnswers[current] === i) ? "checked" : "";
+        var disabled = (userAnswers[current] !== 0) ? "disabled" : "";
+        var selectedClass = (userAnswers[current] === i) ? "selected" : "";
+        optionBox.innerHTML +=
+            "<label class='list-group-item'>" +
+            "<input type='radio' name='opt' value='" + i + "' " + checked + " " + disabled + ">" +
+            "<span class='" + selectedClass + "' onclick='selectAnswer(" + i + ")'>" + questions[current][i] + "</span>" +
+            "</label>";
+    }
+
+    document.getElementById("prevBtn").disabled = (current === 0);
+    document.getElementById("nextBtn").innerText = (current === questions.length - 1) ? "Submit" : "Next";
+
+    var box = document.getElementById("questionBox");
+    box.classList.add("fade");
+    setTimeout(function(){
+        box.classList.remove("fade");
+    }, 500);
+
+    startTimer();
+    slideQuestion();
+}
+
+function startTimer() {
+    clearInterval(timer);
+    time = 10;
+    var circle = document.getElementById("circleTimer");
+    var text = document.getElementById("timeText");
+    var sound = document.getElementById("timerSound");
+    circle.style.strokeDashoffset = 0;
+    circle.style.stroke = "green";
+    sound.pause();
+    sound.currentTime = 0;
+    timer = setInterval(function(){
+        time--;
+        text.innerHTML = time;
+        circle.style.strokeDashoffset = (10 - time) * 25;
+        if(time <= 3){
+            updateTimerColor(time);
+            if(time == 3){
+                sound.volume = 0.4;
+                sound.play();
+            }
+        }
+        if(time == 0){
+            clearInterval(timer);
+            sound.pause();
+            sound.currentTime = 0;
+            nextQuestion();
+        }
+    }, 1000);
+}
+
+function selectAnswer(selected) {
+    if (userAnswers[current] !== 0) return;
+    userAnswers[current] = selected;
+
+    var optionSpans = document.querySelectorAll("#options span");
+    for (var i = 0; i < optionSpans.length; i++) {
+        optionSpans[i].classList.remove("selected");
+    }
+    optionSpans[selected - 1].classList.add("selected");
+
+    var radios = document.getElementsByName("opt");
+    for (var i = 0; i < radios.length; i++) {
+        radios[i].disabled = true;
+    }
+    clearInterval(timer);
+    showLockMessage();
+}
+
+function nextQuestion() {
+    if (userAnswers[current] === 0) {
+        alert("Please select an answer before proceeding.");
+        return;
+    }
+    if (current < questions.length - 1) {
+        current++;
+        loadQuestion();
+    } 
+    else {
+        score = 0;
+        for (var i = 0; i < questions.length; i++) {
+            if (userAnswers[i] === questions[i][5]) {
+                score++;
+            }
+        }
+        var reviewData = [];
+        for (var i = 0; i < questions.length; i++) {
+            reviewData.push({
+                q: questions[i][0],       
+                o1: questions[i][1],      
+                o2: questions[i][2],      
+                o3: questions[i][3],      
+                o4: questions[i][4],      
+                correct: questions[i][5], 
+                given: userAnswers[i]  
+            });
+        }
+        localStorage.setItem("lastReview", JSON.stringify(reviewData));
+
+        window.location.href = "result.html?score=" + score + "&total=" + questions.length + "&cat=" + category + "&level=" + level;
+    }
+}
+
+function prevQuestion() {
+    if (current > 0) {
+        current--;
+        loadQuestion();
+    }
+}
+
+loadQuestion();
+</script>
+</body>
+</html>

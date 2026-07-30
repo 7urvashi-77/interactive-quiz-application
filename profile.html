@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz App - Profile Page</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(to right, #c184e7, #f4d3ea);
+      font-family: Arial, sans-serif;
+    }
+    .profile-card {
+      border-radius: 18px;
+      box-shadow: 0px 6px 15px rgba(60, 56, 56, 0.84);
+      border: none;
+      background: papayawhip;
+    }
+    .profile-img {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      border: 4px double purple;
+      object-fit: cover;
+      box-shadow: 0px 4px 10px rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .profile-img:hover {
+      opacity: 0.85;
+      transform: scale(1.03);
+    }
+    .change-photo-label {
+      font-size: 12px;
+      color: #888;
+      margin-top: 5px;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .change-photo-label:hover { color: purple; }
+
+    .username { font-size: 16px; color: gray; }
+
+    .stats-card {
+      border-radius: 15px;
+      text-align: center;
+      padding: 18px;
+      background: white;
+      box-shadow: 0px 4px 12px rgba(0,0,0,0.12);
+      transition: 0.3s;
+    }
+    .stats-card:hover { transform: translateY(-5px); }
+
+    .list-group-item {
+      border-radius: 10px;
+      margin-bottom: 10px;
+      border: none;
+      box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
+    }
+    .achievement-badge {
+      font-size: 14px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      display: inline-block;
+      margin: 5px;
+    }
+    .btn-custom { border-radius: 12px; font-weight: bold; }
+
+    h4 { font-weight: bold; color: purple; }
+
+    .progress { height: 18px; border-radius: 10px; }
+
+    .cta {
+      background: linear-gradient(15deg, #7c5ca8, #df99f7);
+      color: white;
+    }
+    .log { font-size: 20px; color: peru; text-decoration: none; }
+
+    .no-scores-msg {
+      color: #aaa;
+      font-style: italic;
+      padding: 8px;
+      font-size: 14px;
+    }
+    #backToTop {
+      position: fixed;
+      bottom: 28px;
+      right: 24px;
+      background: purple;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      font-size: 20px;
+      cursor: pointer;
+      display: none;
+      z-index: 999;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.3);
+      transition: 0.3s;
+    }
+    #backToTop:hover { background: #555; transform: scale(1.1); }
+  </style>
+</head>
+
+<body>
+
+  <div class="container mt-4 mb-4">
+
+    <div class="card profile-card p-4">
+      <div class="row align-items-center">
+
+        <div class="col-md-3 text-center">
+          <img id="profileImg" src="images/pro.jpg" class="profile-img" alt="Profile Image"
+               onclick="document.getElementById('photoInput').click()"
+               title="Click to change photo">
+          <div class="change-photo-label" onclick="document.getElementById('photoInput').click()">
+            📷 Change Photo
+          </div>
+          <input type="file" id="photoInput" accept="image/*" style="display:none;">
+        </div>
+
+        <div class="col-md-6">
+          <h3 class="mb-0">Urvashi Sharma</h3>
+          <p class="username">@urvashi_bca</p>
+
+          <span id="levelBadge" class="badge bg-primary p-2">Beginner Level</span>
+
+          <p class="mt-3 mb-1"><b>Email:</b> urvashi@gmail.com</p>
+          <p class="mb-1"><b>Education:</b> BCA Student</p>
+          <p class="mb-1"><b>Location:</b> India</p>
+
+          <p class="mb-1">
+            <b>🔥 Current Streak:</b>
+            <span id="streakDisplay">0 days</span>
+          </p>
+
+          <p class="mt-3 mb-1"><b>Level Progress:</b></p>
+          <div class="progress">
+            <div id="levelProgress" class="progress-bar bg-success" style="width: 0%;">0%</div>
+          </div>
+        </div>
+
+        <div class="col-md-3 text-center">
+          <button class="btn btn-success btn-custom w-100 mb-2">Edit Profile</button>
+          <button class="btn btn-danger btn-custom w-100">
+            <a href="welcome.html" style="text-decoration:none; color:white;">Logout</a>
+          </button>
+        </div>
+
+      </div>
+    </div>
+    <div class="row mt-4 g-3">
+      <div class="col-md-4">
+        <div class="stats-card">
+          <h5>Total Quizzes</h5>
+          <h2 class="text-primary" id="statTotal">0</h2>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stats-card">
+          <h5>Average Score</h5>
+          <h2 class="text-success" id="statAvg">0%</h2>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stats-card">
+          <h5>Best Score</h5>
+          <h2 class="text-warning" id="statBest">—</h2>
+        </div>
+      </div>
+    </div>
+    <div class="card mt-4 p-3 profile-card">
+      <h4>Recent Quiz Activity</h4>
+      <ul class="list-group mt-3" id="recentList">
+        <li class="list-group-item no-scores-msg">No quizzes played yet. Go play one! 🎯</li>
+      </ul>
+    </div>
+
+    <div class="card mt-4 p-3 profile-card">
+      <h4>Achievements</h4>
+      <div class="mt-3" id="achievementsBox">
+  
+      </div>
+    </div>
+
+  </div>
+
+  <section class="cta text-center py-5">
+    <h2 class="fw-bold">Ready to Play?</h2>
+    <p>Join now and start your quiz journey</p>
+    <button class="btn btn-light px-4 rounded-pill">
+      <a class="log" href="index.html">Previous</a>
+    </button>
+  </section>
+
+  <footer class="bg-secondary text-white text-center py-3">
+    &copy; 2026 QuizHub | All Rights Reserved
+  </footer>
+  <button id="backToTop" title="Back to Top">⬆</button>
+
+  <script>
+    var photoInput = document.getElementById("photoInput");
+    var profileImg = document.getElementById("profileImg");
+
+    var savedPhoto = localStorage.getItem("profilePhoto");
+    if(savedPhoto){
+        profileImg.src = savedPhoto; 
+    }
+    photoInput.onchange = function(){
+        var file = photoInput.files[0];
+        if(!file) return;
+
+        var reader = new FileReader();
+        reader.onload = function(e){
+            profileImg.src = e.target.result;              
+            localStorage.setItem("profilePhoto", e.target.result); 
+        };
+        reader.readAsDataURL(file); 
+    };
+    var scoresRaw = localStorage.getItem("scores");
+    var scoreArr = scoresRaw
+        ? scoresRaw.split(",").filter(function(s){ return s.trim() !== ""; })
+        : [];
+
+    var totalQuizzes = scoreArr.length;
+    var totalPoints = 0;
+    var totalPossible = 0;
+    var bestScore = 0;      
+    var bestScoreText = "—";
+    scoreArr.forEach(function(s){
+        var parts = s.split("/");
+        if(parts.length === 2){
+            var got   = parseInt(parts[0]);  // e.g. 4
+            var total = parseInt(parts[1]);  // e.g. 5
+            if(!isNaN(got) && !isNaN(total) && total > 0){
+                totalPoints   += got;
+                totalPossible += total;
+                var pct = Math.round((got / total) * 100);
+                if(pct > bestScore){
+                    bestScore = pct;
+                    bestScoreText = got + "/" + total + " (" + pct + "%)";
+                }
+            }
+        }
+    });
+    var avgPercent = totalPossible > 0 ? Math.round((totalPoints / totalPossible) * 100) : 0;
+
+    document.getElementById("statTotal").textContent = totalQuizzes;
+    document.getElementById("statAvg").textContent   = avgPercent + "%";
+    document.getElementById("statBest").textContent  = bestScoreText;
+
+    var levelBadge    = document.getElementById("levelBadge");
+    var levelProgress = document.getElementById("levelProgress");
+    var levelName, progressPct;
+
+    if(totalQuizzes === 0){
+        levelName = "Newcomer";       progressPct = 0;
+    } else if(totalQuizzes < 5){
+        levelName = "Beginner";       progressPct = 20;
+    } else if(totalQuizzes < 10){
+        levelName = "Intermediate";   progressPct = 50;
+    } else if(totalQuizzes < 20){
+        levelName = "Advanced";       progressPct = 75;
+    } else {
+        levelName = "Expert 🏆";      progressPct = 100;
+    }
+
+    levelBadge.textContent = levelName;
+    levelProgress.style.width = progressPct + "%";
+    levelProgress.textContent = progressPct + "%";
+
+    var streak = parseInt(localStorage.getItem("streakCount")) || 0;
+    document.getElementById("streakDisplay").textContent =
+        streak > 0 ? "🔥 " + streak + " day" + (streak > 1 ? "s" : "") : "Not started yet";
+
+    var recentList = document.getElementById("recentList");
+    if(scoreArr.length === 0){
+        recentList.innerHTML = "<li class='list-group-item no-scores-msg'>No quizzes played yet. Go play one! 🎯</li>";
+    } 
+    else {
+        var last5 = scoreArr.slice(-5).reverse();
+        var html = "";
+        last5.forEach(function(s, i){
+            var parts = s.split("/");
+            var pct = parts.length === 2 ? Math.round((parseInt(parts[0]) / parseInt(parts[1])) * 100) : 0;
+            var badgeColor = pct >= 70 ? "bg-success" : pct >= 40 ? "bg-warning text-dark" : "bg-danger";
+            html += "<li class='list-group-item d-flex justify-content-between align-items-center'>" +
+                    "Quiz Attempt #" + (scoreArr.length - i) +
+                    "<span class='badge " + badgeColor + " p-2'>" + s + " (" + pct + "%)</span>" +
+                    "</li>";
+        });
+        recentList.innerHTML = html;
+    }
+    var achBox = document.getElementById("achievementsBox");
+    var achievements = [
+        { icon: "🏅", label: "First Quiz Completed", earned: totalQuizzes >= 1 },
+        { icon: "🎯", label: "Played 5 Quizzes",     earned: totalQuizzes >= 5 },
+        { icon: "🏆", label: "Played 10 Quizzes",    earned: totalQuizzes >= 10 },
+        { icon: "⭐", label: "Scored 80%+",           earned: bestScore >= 80 },
+        { icon: "💯", label: "Perfect Score!",        earned: bestScore === 100 },
+        { icon: "🔥", label: "3 Day Streak",          earned: streak >= 3 },
+        { icon: "🚀", label: "7 Day Streak",          earned: streak >= 7 }
+    ];
+
+    var achHtml = "";
+    achievements.forEach(function(a){
+        if(a.earned){
+            achHtml += "<span class='badge bg-warning text-dark achievement-badge'>" + a.icon + " " + a.label + "</span>";
+        } else {
+            achHtml += "<span class='badge bg-secondary achievement-badge' style='opacity:0.4;' title='Not yet earned'>🔒 " + a.label + "</span>";
+        }
+    });
+    achBox.innerHTML = achHtml;
+    var topBtn = document.getElementById("backToTop");
+    window.onscroll = function(){
+        topBtn.style.display = window.scrollY > 200 ? "block" : "none";
+    };
+    topBtn.onclick = function(){
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    };
+  </script>
+
+</body>
+</html>
