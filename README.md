@@ -53,15 +53,10 @@ Interactive-Quiz-Application/
 
 ---
 
-## ▶️ How to Run
+## Live Demo
 
-1. Download or clone the repository.
-2. Open `index.html` in your browser.
-3. Start exploring the quiz.
+https://7urvashi-77.github.io/interactive-quiz-application/
 
----
+## GitHub Repository
 
-## 👩‍💻 Author
-
-**Urvashi Solanki**# interactive-quiz-application
-Responsive quiz application built using HTML, CSS, Bootstrap, JavaScript and jQuery.
+https://github.com/7urvashi-77/interactive-quiz-application
